@@ -39,7 +39,6 @@ impl EventHandler for Handler {
         let token = opt_token.unwrap();
         let channel_result = ctx.http.get_channel(780439236867653635).await;
         let channel = channel_result.unwrap();
-        
         // let channel = await http.get_channel(780439236867653635);
         // GuildChannel::say(&self, http, content)
         // self.message(ctx, new_message)
