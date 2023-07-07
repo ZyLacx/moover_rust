@@ -41,12 +41,6 @@ impl EventHandler for Handler {
 
         let channel = ctx.http.get_channel(780439236867653635).await.unwrap();
 
-        // let channel = await http.get_channel(780439236867653635);
-        // GuildChannel::say(&self, http, content)
-        // self.message(ctx, new_message)
-        // C = ;
-
-        // const debug_channel =
     }
 }
 
