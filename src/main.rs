@@ -1,14 +1,11 @@
-use std::sync::Arc;
-
-use poise::serenity_prelude::GuildChannel;
 use serenity::async_trait;
-use serenity::http::{self, Http};
 use serenity::model::channel::Message;
 use serenity::model::gateway::Ready;
-use serenity::model::id::ChannelId;
 use serenity::prelude::*;
 use util::security::dotenv_var;
+use rand::random;
 
+mod moove;
 mod util;
 
 struct Handler;
@@ -25,22 +22,29 @@ impl EventHandler for Handler {
 
     async fn ready(&self, ctx: Context, ready: Ready) {
         println!("{} is connected!", ready.user.name);
-        // if (ready.user.name != "MOOver Debug") {
-        let messages = [
-            "AAAAAAAAAAAAAAAAAAAA",
-            "Henlooo",
-            "Good day y'all!",
-            "May have crashed...",
-            "MOOOooo",
-            "Heyyyyy!",
-            "I'm baaaaack!",
-            "Whom'st have summoned the ancient one?",
-        ];
-
-        // }
-
-        let channel = ctx.http.get_channel(780439236867653635).await.unwrap();
-
+        let debug = match dotenv_var("DEBUG") {
+            Some(v) => v,
+            None => "OFF".to_string()
+        };
+        if debug == "ON" {
+            let messages = [
+                "AAAAAAAAAAAAAAAAAAAA",
+                "Henlooo",
+                "Good day y'all!",
+                "May have crashed...",
+                "MOOOooo",
+                "Heyyyyy!",
+                "I'm baaaaack!",
+                "Whom'st have summoned the ancient one?",
+                ];
+            
+            let rand_num = random::<usize>() % messages.len();
+            let channel = ctx.http.get_channel(780439236867653635).await.unwrap().id();
+            match channel.say(&ctx.http, messages[rand_num]).await {
+                Err(e) => println!("Something went wrong: {e}"),
+                Ok(_) => return
+            };
+        }
     }
 }
 
@@ -49,7 +53,6 @@ async fn main() -> anyhow::Result<()> {
     use anyhow::Context;
     let token = dotenv_var("TOKEN").context("No TOKEN in env")?;
     let intents = GatewayIntents::GUILD_MESSAGES
-        | GatewayIntents::DIRECT_MESSAGES
         | GatewayIntents::MESSAGE_CONTENT;
     
     let mut client = Client::builder(&token, intents)
