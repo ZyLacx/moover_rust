@@ -981,6 +981,7 @@ dependencies = [
  "serenity",
  "serenity_utils",
  "tokio",
+ "url",
 ]
 
 [[package]]
