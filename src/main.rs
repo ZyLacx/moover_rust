@@ -16,7 +16,6 @@ struct Handler;
 #[async_trait]
 impl EventHandler for Handler {
     async fn message(&self, ctx: Context, msg: Message) {
-        println!("Got message");
         handle(ctx, msg).await;
     }
 
