@@ -1,4 +1,3 @@
-use moove::moove;
 use rand::random;
 use serenity::async_trait;
 use serenity::model::channel::Message;
@@ -6,7 +5,10 @@ use serenity::model::gateway::Ready;
 use serenity::prelude::*;
 use util::security::dotenv_var;
 
-mod moove;
+mod message_handler;
+use message_handler::handle;
+
+mod commands;
 mod util;
 
 struct Handler;
@@ -14,15 +16,8 @@ struct Handler;
 #[async_trait]
 impl EventHandler for Handler {
     async fn message(&self, ctx: Context, msg: Message) {
-        match moove(ctx.http.clone(), msg.clone()).await {
-            Ok(_) => (),
-            Err(e) => println!("ERROR MOVING!{e}"),
-        }
-        if msg.content == "!ping" {
-            if let Err(why) = msg.channel_id.say(&ctx.http, "Pong!").await {
-                println!("Error sending message: {:?}", why);
-            }
-        }
+        println!("Got message");
+        handle(ctx, msg).await;
     }
 
     async fn ready(&self, ctx: Context, ready: Ready) {
@@ -31,7 +26,7 @@ impl EventHandler for Handler {
             Some(v) => v,
             None => "OFF".to_string(),
         };
-        if debug == "ON" {
+        if debug != "ON" {
             let messages = [
                 "AAAAAAAAAAAAAAAAAAAA",
                 "Henlooo",
