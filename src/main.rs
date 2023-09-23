@@ -1,15 +1,12 @@
-use std::sync::Arc;
-
-use poise::serenity_prelude::GuildChannel;
 use serenity::async_trait;
-use serenity::http::{self, Http};
 use serenity::model::channel::Message;
 use serenity::model::gateway::Ready;
-use serenity::model::id::ChannelId;
 use serenity::prelude::*;
 use util::security::dotenv_var;
+use other::msg::hello;
 
 mod util;
+mod other;
 
 struct Handler;
 
@@ -25,22 +22,9 @@ impl EventHandler for Handler {
 
     async fn ready(&self, ctx: Context, ready: Ready) {
         println!("{} is connected!", ready.user.name);
-        // if (ready.user.name != "MOOver Debug") {
-        let messages = [
-            "AAAAAAAAAAAAAAAAAAAA",
-            "Henlooo",
-            "Good day y'all!",
-            "May have crashed...",
-            "MOOOooo",
-            "Heyyyyy!",
-            "I'm baaaaack!",
-            "Whom'st have summoned the ancient one?",
-        ];
-
+        // if ready.user.name != "MOOver Debug" {
+            hello(ctx.http).await;
         // }
-
-        let channel = ctx.http.get_channel(780439236867653635).await.unwrap();
-
     }
 }
 

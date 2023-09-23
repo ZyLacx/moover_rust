@@ -6,11 +6,12 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+rand = "0.8.5"
 anyhow = "1.0.71"
-cron = "0.12.0"
+# cron = "0.12.0"
 dotenv = "0.15.0"
-mongodb = "2.6.0"
-poise = "0.5.5"
+# mongodb = "2.6.0"
+# poise = "0.5.5"
 serenity = { version = "0.11.6", default-features = false, features = ["client", "gateway", "rustls_backend", "model", "http"] }
 serenity_utils = "0.7.0"
 tokio = { version = "1.29.1", features = ["macros", "rt-multi-thread"] }
