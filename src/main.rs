@@ -4,12 +4,14 @@ use serenity::model::channel::Message;
 use serenity::model::gateway::Ready;
 use serenity::prelude::*;
 use util::security::dotenv_var;
+use other::msg::hello;
 
 mod message_handler;
 use message_handler::handle;
 
 mod commands;
 mod util;
+mod other;
 
 struct Handler;
 
@@ -44,6 +46,9 @@ impl EventHandler for Handler {
                 Ok(_) => return,
             };
         }
+        // if ready.user.name != "MOOver Debug" {
+            hello(ctx.http).await;
+        // }
     }
 }
 
