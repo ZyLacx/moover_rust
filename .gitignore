@@ -1,6 +1,11 @@
+# Build files
 /target
+
+# Tokens
 .env
 
+# Hidden files
 /src/.*
 
+# IDE config
 .vscode

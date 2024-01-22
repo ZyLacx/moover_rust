@@ -6,6 +6,6 @@ pub fn dotenv_var(key: &str) -> Option<String> {
 
     match env::var(key) {
         Ok(val) => return Some(val),
-        Err(_) => None,
+        Err(_) => None
     }
 }
