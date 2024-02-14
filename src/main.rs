@@ -1,17 +1,27 @@
-use rand::random;
+use std::sync::atomic::AtomicUsize;
+
+use chrono::Utc;
 use serenity::async_trait;
 use serenity::model::channel::Message;
 use serenity::model::gateway::Ready;
 use serenity::prelude::*;
+use serenity::client::Context;
+
+// use tokio_cron_scheduler::{JobScheduler, JobToRun, Job};
+use tokio_schedule::{every, EveryDay, Job};
 use util::security::dotenv_var;
-use other::msg::hello;
+
+use std::sync::Arc;
 
 mod message_handler;
 use message_handler::handle;
 
 mod commands;
 mod util;
+use util::debug::send_error;
+
 mod other;
+use other::notice;
 
 struct Handler;
 
@@ -23,39 +33,46 @@ impl EventHandler for Handler {
 
     async fn ready(&self, ctx: Context, ready: Ready) {
         println!("{} is connected!", ready.user.name);
-        let debug = match dotenv_var("DEBUG") {
-            Some(v) => v,
-            None => "OFF".to_string(),
-        };
-        if debug != "ON" {
-            let messages = [
-                "AAAAAAAAAAAAAAAAAAAA",
-                "Henlooo",
-                "Good day y'all!",
-                "May have crashed...",
-                "MOOOooo",
-                "Heyyyyy!",
-                "I'm baaaaack!",
-                "Whom'st have summoned the ancient one?",
-            ];
 
-            let rand_num = random::<usize>() % messages.len();
-            let channel = ctx.http.get_channel(780439236867653635).await.unwrap().id();
-            match channel.say(&ctx.http, messages[rand_num]).await {
-                Err(e) => println!("Something went wrong: {e}"),
-                Ok(_) => return,
-            };
-        }
-        // if ready.user.name != "MOOver Debug" {
-            hello(ctx.http).await;
-        // }
+
+        // use util::debug::hello;
+        // hello(ctx.http.clone()).await;
+
+        notice::notice_wrapper(ctx).await;
+
+        // let scheduler = every(1).day().at(13, 30, 0)
+        //     .perform(|| async {
+        //         notice::notice_wrapper(ctx.clone()).await
+        //     }).await;
+
+        // let mut scheduler = JobScheduler::new().await;
+        // scheduler.
+        // scheduler.add(match Job::new_async("5 * * * * * *", |uuid, mut l| Box::pin( async {
+        //     notice::notice(ctx.clone()).await;
+        // })) {
+        //     Ok(_) => {}
+        //     Err(e) => {
+        //         send_error(ctx.http.clone(), e.to_string());
+        //         panic!()
+        //     }
+        // });
+        // scheduler.add(Job::new(daily("22"), move || {
+        //     notice::notice(ctx.clone())
+        // }));
     }
 }
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     use anyhow::Context;
-    let token = dotenv_var("TOKEN").context("No TOKEN in env")?;
+    
+    let token_str = "TOKEN";
+    
+    #[cfg(feature="DEBUG")]
+    let token_str = "DEBUGTOKEN";
+
+    let token = dotenv_var(token_str).context("No TOKEN in env")?;
+
     let intents = GatewayIntents::GUILD_MESSAGES | GatewayIntents::MESSAGE_CONTENT;
 
     let mut client = Client::builder(&token, intents)
