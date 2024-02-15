@@ -44,7 +44,7 @@ async fn response(http: Arc<Http>, msg: Message) -> bool {
     const RESPONSES: [&str; 4] = [
         "To som jaaa",
         "Henloooo",
-        "Čo môj?",
+        "No čo je?",
         "Hm?"
     ];
 
