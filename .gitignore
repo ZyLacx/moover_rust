@@ -2,10 +2,12 @@
 /target
 
 # Tokens
-# .env
+.env
 
 # Hidden files
 /src/.*
 
 # IDE config
 .vscode
+
+mooverdb.db

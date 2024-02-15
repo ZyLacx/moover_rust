@@ -34,11 +34,12 @@ impl EventHandler for Handler {
     async fn ready(&self, ctx: Context, ready: Ready) {
         println!("{} is connected!", ready.user.name);
 
+        #[cfg(feature="RELEASE")] {
+            use util::debug::hello;
+            hello(ctx.http.clone()).await;
+        }
 
-        // use util::debug::hello;
-        // hello(ctx.http.clone()).await;
-
-        notice::notice_wrapper(ctx).await;
+        // notice::notice_wrapper(ctx).await;
 
         // let scheduler = every(1).day().at(13, 30, 0)
         //     .perform(|| async {
@@ -65,13 +66,13 @@ impl EventHandler for Handler {
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     use anyhow::Context;
-    
+
     let token_str = "TOKEN";
     
     #[cfg(feature="DEBUG")]
     let token_str = "DEBUGTOKEN";
 
-    let token = dotenv_var(token_str).context("No TOKEN in env")?;
+    let token = dotenv_var(token_str).context("TOKEN not found in env")?;
 
     let intents = GatewayIntents::GUILD_MESSAGES | GatewayIntents::MESSAGE_CONTENT;
 
