@@ -1,18 +1,22 @@
-use serenity::{all::ChannelId, builder::CreateMessage, http::Http};
-use std::{process::exit, sync::Arc};
+use std::sync::Arc;
 
-pub async fn send_error(http: Arc<Http>, msg: String) {
+use serenity::http::Http;
+
+pub async fn send_error(_http: Arc<Http>, msg: String) {
     println!("ERROR: {msg}");
-
+    
     #[cfg(feature="RELEASE")]
     match ChannelId::new(1199495008416440491)
-        .send_message(http, CreateMessage::new().content(msg)).await {
+    .send_message(_http, CreateMessage::new().content(msg)).await {
             Ok(_) => { return; }
             Err(_) => { exit(-1) }
         };
-}
-
+    }
+    
+#[cfg(feature="RELEASE")]
 pub async fn hello(http: Arc<Http>) {
+    use serenity::http::Http;
+
     let messages = [
         "AAAAAAAAAAAAAAAAAAAA",
         "Henlooo",

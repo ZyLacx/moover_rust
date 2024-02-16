@@ -1,24 +1,23 @@
-use std::sync::atomic::AtomicUsize;
-
-use chrono::Utc;
 use serenity::async_trait;
-use serenity::model::channel::Message;
-use serenity::model::gateway::Ready;
-use serenity::prelude::*;
+use serenity::prelude::GatewayIntents;
 use serenity::client::Context;
+use serenity::model::gateway::Ready;
+use serenity::all::{Message, EventHandler};
+use serenity::Client;
 
-// use tokio_cron_scheduler::{JobScheduler, JobToRun, Job};
-use tokio_schedule::{every, EveryDay, Job};
+use tokio_cron_scheduler::{JobScheduler, Job};
 use util::security::dotenv_var;
-
-use std::sync::Arc;
 
 mod message_handler;
 use message_handler::handle;
 
+use std::future::Future;
+use std::pin::Pin;
+
+// use chrono::Utc;
+
 mod commands;
 mod util;
-use util::debug::send_error;
 
 mod other;
 use other::notice;
@@ -38,28 +37,18 @@ impl EventHandler for Handler {
             use util::debug::hello;
             hello(ctx.http.clone()).await;
         }
+        
+        let sched = JobScheduler::new().await.unwrap();
 
-        // notice::notice_wrapper(ctx).await;
+        let job_closure = move |_, _| -> Pin<Box<dyn Future<Output = ()> + Send>> {
+            let ctx_clone = ctx.clone();
+            Box::pin( async move {
+                notice::notice_wrapper(ctx_clone).await;
+            })
+        };
 
-        // let scheduler = every(1).day().at(13, 30, 0)
-        //     .perform(|| async {
-        //         notice::notice_wrapper(ctx.clone()).await
-        //     }).await;
-
-        // let mut scheduler = JobScheduler::new().await;
-        // scheduler.
-        // scheduler.add(match Job::new_async("5 * * * * * *", |uuid, mut l| Box::pin( async {
-        //     notice::notice(ctx.clone()).await;
-        // })) {
-        //     Ok(_) => {}
-        //     Err(e) => {
-        //         send_error(ctx.http.clone(), e.to_string());
-        //         panic!()
-        //     }
-        // });
-        // scheduler.add(Job::new(daily("22"), move || {
-        //     notice::notice(ctx.clone())
-        // }));
+        sched.add(Job::new_async("0 0 13 * * *", job_closure).expect("Cron job not set up correctly")).await.unwrap();
+        sched.start().await.unwrap();
     }
 }
 
