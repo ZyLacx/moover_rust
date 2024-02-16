@@ -10,4 +10,4 @@
 # IDE config
 .vscode
 
-mooverdb.db
+mooverdb.db*
