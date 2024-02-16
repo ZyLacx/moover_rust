@@ -1,4 +1,5 @@
 use rand::random;
+use serenity::http::CacheHttp;
 use serenity::{client::Context, http::Http};
 use serenity::model::channel::Message;
 use std::sync::Arc;
@@ -28,12 +29,19 @@ pub async fn handle(ctx: Context, msg: Message) {
         }
     }
     
+    if random::<u16>() % 1000 == 666 {
+        match msg.reply(ctx.http(), "Povedz loď").await {
+            Ok(_) => {},
+            Err(e) => send_error(ctx.http.clone(), e.to_string()).await
+        }
+    }
+
     let channel_id = match moove_check(&msg).await {
         Some(val) => val,
         None => return
     };
 
-    match moove(ctx.http, msg, channel_id).await {
+    match moove(ctx.http, msg.clone(), channel_id).await {
         Ok(_) => return,
         Err(e) => println!("ERROR: {e}")
     };
