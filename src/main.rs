@@ -31,7 +31,7 @@ impl EventHandler for Handler {
     }
 
     async fn ready(&self, ctx: Context, ready: Ready) {
-        println!("{} is connected!", ready.user.name);
+        println!("{} v0.2 is connected!", ready.user.name);
 
         #[cfg(feature="RELEASE")] {
             use util::debug::hello;
