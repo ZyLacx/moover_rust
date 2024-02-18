@@ -19,6 +19,7 @@ chrono = "0.4.31"
 sqlx = {version="0.7.3", features=["runtime-tokio", "sqlite"]}
 json = "0.12.4"
 reqwest = "0.11.24"
+form_urlencoded = "1.2.1"
 
 [features]
 DEBUG = []

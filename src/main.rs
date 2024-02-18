@@ -14,8 +14,6 @@ use message_handler::handle;
 use std::future::Future;
 use std::pin::Pin;
 
-// use chrono::Utc;
-
 mod commands;
 mod util;
 
@@ -37,7 +35,7 @@ impl EventHandler for Handler {
             use util::debug::hello;
             hello(ctx.http.clone()).await;
         }
-        
+
         let sched = JobScheduler::new().await.unwrap();
 
         let job_closure = move |_, _| -> Pin<Box<dyn Future<Output = ()> + Send>> {

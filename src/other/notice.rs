@@ -2,7 +2,7 @@ use chrono::{Datelike, Local};
 
 use serenity::{all::{GuildId, UserId}, builder::{CreateEmbed, CreateMessage}, client::Context, http::Http, model::Colour};
 
-use anyhow::Ok;
+// use anyhow::Ok;
 
 use sqlx::{Connection, FromRow, SqliteConnection};
 
@@ -11,6 +11,8 @@ use crate::util::debug::send_error;
 use crate::util::utilities;
 
 use std::sync::Arc;
+
+use super::{tenor, tenor_builder::Tenor, tenor_types::{ContentFilter, MediaFilter}};
 
 // pub async fn notice_wrapper(http: Arc<Http>) {
 pub async fn notice_wrapper(ctx: Context) {
@@ -24,6 +26,7 @@ pub async fn notice_wrapper(ctx: Context) {
 }
 
 async fn announce_event(guild_id: GuildId, name: &str, special_message: &str, http: Arc<Http>) -> anyhow::Result<()> {
+   
     let mut event_embed = CreateEmbed::new()
         .color(Colour::new(rand::random::<u32>() % 0xFFFFFF))
         .title("Today's event is:");
@@ -45,12 +48,34 @@ async fn announce_event(guild_id: GuildId, name: &str, special_message: &str, ht
 }
 
 async fn celebrate_birthday(guild_id: GuildId, user_id: UserId, nick: &str, http: Arc<Http>) -> anyhow::Result<()> {
+    
+    const LIMIT: u8 = 20;
+
+    let tenor_response = Tenor::new()
+        .random(true)
+        .contentfilter(ContentFilter::low)
+        .add_media_filter(MediaFilter::gif)
+        .search("vsetko najlepsie").await?;
+
+    let index = rand::random::<usize>() % LIMIT as usize;
+    let gif_url = match tenor::get_gif_url(MediaFilter::gif, tenor_response) {
+        Ok(urls) => Some(urls),
+        Err(e) => {
+            send_error(http.clone(), e.to_string()).await;
+            None
+        }
+    };
+
     let system_channel = utilities::get_system_channel(guild_id, http.clone()).await?;
 
-    let embed = CreateEmbed::new()
+    let mut embed = CreateEmbed::new()
         .color(Colour::new(rand::random::<u32>() % 0xFFFFFF))
         .title(format!("HAPPY BIRTHDAY {}!", nick))
         .description(format!("<@{}>'s birthday is today!!! Yay!", user_id.get()));
+
+    if gif_url.is_some() {
+        embed = embed.image(gif_url.unwrap()[index].as_str());
+    }
 
     system_channel.send_message(http.clone(), CreateMessage::new().add_embed(embed.clone())).await?;
 
@@ -90,19 +115,19 @@ async fn notice(http: Arc<Http>) -> anyhow::Result<()> {
         "SELECT id, nick FROM birthdays
         WHERE day=? AND month=?;"
     )
-    .bind(day)
-    .bind(month)
-    .fetch_all(&mut db)
-    .await?;
+        .bind(day)
+        .bind(month)
+        .fetch_all(&mut db)
+        .await?;
 
     let global_events = sqlx::query_as::<_, EventRow>(
         "SELECT id, guild, name, year, special_message from events
         WHERE day=? AND month=? AND guild=0;"
     )
-    .bind(day)
-    .bind(month)
-    .fetch_all(&mut db)
-    .await?;
+        .bind(day)
+        .bind(month)
+        .fetch_all(&mut db)
+        .await?;
 
     let guilds = http.get_guilds(None, None).await?;
 
@@ -127,18 +152,18 @@ async fn notice(http: Arc<Http>) -> anyhow::Result<()> {
         }
     }
 
-    let global_events = sqlx::query_as::<_, EventRow>(
+    let guild_events = sqlx::query_as::<_, EventRow>(
         "SELECT id, guild, name, year, special_message from events
         WHERE day=? AND month=? AND guild!=0;"
     )
-    .bind(day)
-    .bind(month)
-    .fetch_all(&mut db)
-    .await?;
+        .bind(day)
+        .bind(month)
+        .fetch_all(&mut db)
+        .await?;
 
     // TODO if has year delete it from announce and delete
 
-    for e in &global_events {
+    for e in &guild_events {
         announce_event(GuildId::new(e.guild), e.name.as_str(), e.special_message.as_str(), http.clone()).await?;
     }
 
