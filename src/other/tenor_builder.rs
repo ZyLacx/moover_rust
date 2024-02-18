@@ -120,7 +120,6 @@ impl Tenor {
 
         let q: String = form_urlencoded::byte_serialize(query.as_bytes()).collect();
 
-        // TODO encode query for urls (replace special characters and stuff)
         let base_url = "https://tenor.googleapis.com/v2/search?";
         let api_key = dotenv_var("TENORV2").context("TENORV2 key not found in the .env")?;
 
